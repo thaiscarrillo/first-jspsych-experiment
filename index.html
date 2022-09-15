@@ -1,0 +1,40 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>jsPSYCH</title>
+
+    <script src="https://unpkg.com/jspsych@7.3.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.1"></script>
+
+</head>
+
+<body>
+
+    <script>
+        const jsPsych = initJsPsych();
+
+        const hello_trial = {
+
+            type: jsPsychHtmlKeyboardResponse,
+
+            stimulus: 'Hello World!',
+
+            choices: ['Y', 'N'],
+
+            stimulus_duration: 500,
+
+            prompt: 'Press Y or N',
+
+            trial_duration: 2000
+
+        }
+
+        jsPsych.run([hello_trial]);
+
+    </script>
+
+</body>
+
+</html>
