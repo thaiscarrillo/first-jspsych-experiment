@@ -7,31 +7,73 @@
 
     <script src="https://unpkg.com/jspsych@7.3.0"></script>
     <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.1"></script>
+    <link href="https://unpkg.com/jspsych@7.3.0/css/jspsych.css" rel="stylesheet" type="text/css" />
+    <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@1.1.1"></script>
+
 
 </head>
 
 <body>
 
     <script>
-        const jsPsych = initJsPsych();
+        const jsPsych = initJsPsych({
+            on_finish: function () {
+                jsPsych.data.displayData();
+            }
+        });
 
-        const hello_trial = {
+        var fixation1 = {
 
             type: jsPsychHtmlKeyboardResponse,
 
-            stimulus: 'Hello World!',
+            stimulus: '<p style="font-size: 48px;">+</p>',
 
-            choices: ['Y', 'N'],
+            choices: "NO_KEYS",
 
-            stimulus_duration: 500,
-
-            prompt: 'Press Y or N',
-
-            trial_duration: 2000
+            trial_duration: 1000
 
         }
 
-        jsPsych.run([hello_trial]);
+        var sentence = {
+
+            type: jsPsychHtmlKeyboardResponse,
+
+            stimulus: 'You dropped a balloon on a vase',
+
+            choices: " "
+
+        }
+
+        var fixation2 = {
+
+            type: jsPsychHtmlKeyboardResponse,
+
+            stimulus: '<p style="font-size: 48px;">+</p>',
+
+            choices: "NO_KEYS",
+
+            trial_duration: 500
+
+        }
+
+        var picture = {
+
+            type: jsPsychImageKeyboardResponse,
+
+            stimulus: "vase.jpeg",
+
+            choices: ['S', 'N', 's', 'n']
+
+        }
+
+        var end_experiment = {
+
+            type: jsPsychHtmlKeyboardResponse,
+
+            stimulus: 'Thank you for participating! Click any key to end the experiment.',
+        }
+
+        jsPsych.run([fixation1, sentence, fixation2,picture, end_experiment]);
 
     </script>
 
