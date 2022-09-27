@@ -10,7 +10,10 @@
     <link href="https://unpkg.com/jspsych@7.3.0/css/jspsych.css" rel="stylesheet" type="text/css" />
     <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@1.1.1"></script>
     <script src="stimuli.js"></script>
-
+    <script src= "list1.js" ></script>
+    <script src= "list2.js" ></script>
+    <script src= "list3.js" ></script>
+    <script src= "list4.js" ></script>
 
 </head>
 
@@ -23,6 +26,8 @@
             }
         });
 
+        var subject_id = Math.floor(Math.random() * 100000);
+
         var fixation1 = {
 
             type: jsPsychHtmlKeyboardResponse,
@@ -31,7 +36,14 @@
 
             choices: "NO_KEYS",
 
-            trial_duration: 1000
+            trial_duration: 1000,
+
+            data: {
+                typeoftrial: 'fixation1',
+                list_number: jsPsych.timelineVariable('List'),
+                trialcondition: jsPsych.timelineVariable('condition'),
+                subject: subject_id
+            }
 
         }
 
@@ -41,7 +53,14 @@
 
             stimulus: jsPsych.timelineVariable('sentence'),
 
-            choices: " "
+            choices: " ",
+
+            data: {
+                typeoftrial: 'sentence',
+                list_number: jsPsych.timelineVariable('List'),
+                trialcondition: jsPsych.timelineVariable('condition'),
+                subject: subject_id
+            }
 
         }
 
@@ -53,7 +72,14 @@
 
             choices: "NO_KEYS",
 
-            trial_duration: 500
+            trial_duration: 500,
+
+            data: {
+                typeoftrial: 'fixation2',
+                list_number: jsPsych.timelineVariable('List'),
+                trialcondition: jsPsych.timelineVariable('condition'),
+                subject: subject_id
+            }
 
         }
 
@@ -63,7 +89,14 @@
 
             stimulus: jsPsych.timelineVariable('pic'),
 
-            choices: ['S', 'N', 's', 'n']
+            choices: ['S', 'N', 's', 'n'],
+
+            data: {
+                typeoftrial: 'picture',
+                list_number: jsPsych.timelineVariable('List'),
+                trialcondition: jsPsych.timelineVariable('condition'),
+                subject: subject_id
+            }
 
         }
 
@@ -74,9 +107,22 @@
             stimulus: 'Thank you for participating! Click any key to end the experiment.',
         }
 
+        var list = [1, 2, 3, 4]
+        var CONDITION = list[Math.floor(Math.random() * list.length)];
+
+        var teststimuli = []
+        if (CONDITION == 1) { teststimuli = list1 }
+        else if (CONDITION == 2) { teststimuli = list2 }
+        else if (CONDITION == 3) { teststimuli = list3 }
+        else { teststimuli = list4 }
+
+        // console.log("list=", list)
+        // console.log("CONDITION=", CONDITION)
+        // console.log("teststimuli=", teststimuli)
+
         var experiment_procedure = {
             timeline: [fixation1, sentence, fixation2, picture],
-            timeline_variables: stimuli,
+            timeline_variables: teststimuli,
             randomize_order: true
         };
 
