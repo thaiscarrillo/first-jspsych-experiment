@@ -9,11 +9,16 @@
     <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.1"></script>
     <link href="https://unpkg.com/jspsych@7.3.0/css/jspsych.css" rel="stylesheet" type="text/css" />
     <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@1.1.1"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-preload@1.1.1"></script>
     <script src="stimuli.js"></script>
-    <script src= "list1.js" ></script>
-    <script src= "list2.js" ></script>
-    <script src= "list3.js" ></script>
-    <script src= "list4.js" ></script>
+    <script src="list1.js"></script>
+    <script src="list2.js"></script>
+    <script src="list3.js"></script>
+    <script src="list4.js"></script>
+    <script src="practice.js"></script>
+    <script src="images.js"></script>
+
+
 
 </head>
 
@@ -27,6 +32,35 @@
         });
 
         var subject_id = Math.floor(Math.random() * 100000);
+
+        var instruct1 = {
+
+            type: jsPsychHtmlKeyboardResponse,
+
+            stimulus: 'Welcome to the experiment',
+
+            choices: "NO_KEYS",
+
+            trial_duration: 5000,
+
+            data: {
+                typeoftrial: 'fixation1',
+                list_number: jsPsych.timelineVariable('List'),
+                trialcondition: jsPsych.timelineVariable('condition'),
+                subject: subject_id
+            }
+
+        }
+
+        var preload = {
+            type: jsPsychPreload,
+            images: imagelist,
+            show_progress_bar: true,
+            data: {
+                typeoftrial: 'preload',
+                subject: subject_id
+            }
+        };
 
         var fixation1 = {
 
@@ -96,9 +130,55 @@
                 list_number: jsPsych.timelineVariable('List'),
                 trialcondition: jsPsych.timelineVariable('condition'),
                 subject: subject_id
+            },
+
+            on_finish: function (data) {
+                // score the response as correct or incorrect.
+                if (jsPsych.pluginAPI.compareKeys(data.response, jsPsych.timelineVariable('correct'))) {
+                    data.correct = true;
+                }
+                else {
+                    data.correct = false;
+                }
+
             }
 
         }
+
+        var feedback = {
+
+            type: jsPsychHtmlKeyboardResponse,
+
+            stimulus: function () {
+
+                var last_trial_correct = jsPsych.data.get().last(1).values()[0].correct;
+
+                if (last_trial_correct) { return "CORRECT!"; }
+
+                else {
+
+                    return "WRONG!";
+
+                }
+
+            },
+
+            choices: "NO_KEYS",
+
+            trial_duration: 2000
+
+        }
+
+
+        var practice_procedure = {
+
+            timeline: [fixation1, sentence, fixation2, picture, feedback],
+
+            timeline_variables: practicestimuli,
+
+            randomize_order: true
+
+        };
 
         var end_experiment = {
 
@@ -126,7 +206,7 @@
             randomize_order: true
         };
 
-        jsPsych.run([experiment_procedure, end_experiment]);
+        jsPsych.run([preload, practice_procedure, experiment_procedure, end_experiment]);
         
     </script>
 
