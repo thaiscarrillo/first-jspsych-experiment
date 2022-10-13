@@ -1,0 +1,102 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+# install packages
+```{r}
+#install.packages("tidyverse",dependencies = TRUE)
+#install.packages("ggthemes", dependencies = FALSE)
+```
+# load packages
+```{r}
+library(tidyverse)
+library(ggthemes)
+library(ggplot2)
+```
+#import data
+
+```{r}
+exp1 = read_csv("exp1.csv")
+
+nrow(exp1)
+
+ncol(exp1)
+
+colnames(exp1)
+
+hist(exp1$rt)
+```
+# tidyverse verbs
+```{r}
+condition_data = exp1 %>%
+select(subject, rt, typeoftrial, trialcondition, correct)%>%
+filter(typeoftrial == "picture" &
+         trialcondition %in%
+c("Heavy_Normal", "Light_Smashed", "Heavy_Smashed", "Light_Normal"))
+```
+# exercise
+```{r}
+exp1 %>%
+select(dataset, correct, typeoftrial) %>%
+filter(correct == 1 & typeoftrial == "picture")
+```
+# 
+```{r}
+means = condition_data %>%
+  group_by(trialcondition)%>%
+  summarise(mean_rt = mean(rt),
+    sd_rt = sd(rt),
+    mean_acc = mean(correct))
+```
+
+# ggplot basics
+```{r}
+library(ggplot2)
+library(ggthemes)
+
+condition_data %>%
+  filter(rt <25000)%>%
+  ggplot(aes(x = rt)) +
+  geom_histogram(binwidth = 1000,
+                 fill = "red", color = "black",
+                 position = "identity") +
+  theme_few()+
+  xlab("RT (in milliseconds)") +
+  ylab("Count") +
+  ggtitle("Histogram of RT")
+```
+```{r}
+means %>%
+  ggplot(aes(x=trialcondition, y=mean_rt))+
+  geom_bar(stat = "identity", fill = "red", color = "blue")+
+  theme_fivethirtyeight()+
+  xlab("RT (in milliseconds")+
+  ylab("Count")+
+  ggtitle("Barplot of R")
+```
+
+#read 
+```{r}
+df = read_csv("relatedness_exp.csv")
+```
+# class exercises
+```{r}
+part_df = df %>%
+  select(ID, Type, pathlength, RT)%>%
+  filter(Type == "Related" & pathlength %in%
+  c(1,2))
+```
+
+#exercise 2
+```{r}
+mean_all = df %>%
+  summarize(mean = mean(RT))
+
+mean_part = part_df %>%
+  summarize(mean = mean(RT))
+
+mean_ID = df %>%
+  group_by(ID) %>%
+  summarize(mean = mean(RT))
+  
+```
