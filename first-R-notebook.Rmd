@@ -26,13 +26,19 @@ colnames(exp1)
 
 hist(exp1$rt)
 ```
-# tidyverse verbs
+# Horchak & Garrido
 ```{r}
 condition_data = exp1 %>%
 select(subject, rt, typeoftrial, trialcondition, correct)%>%
 filter(typeoftrial == "picture" &
          trialcondition %in%
 c("Heavy_Normal", "Light_Smashed", "Heavy_Smashed", "Light_Normal"))
+
+condition_data = condition_data %>%
+  separate(trialcondition, into = c("weight", "shape"), sep = "_")
+
+
+# condition_data %>% group_by(subject, trialcondition) %>% count()
 ```
 # exercise
 ```{r}
@@ -40,10 +46,10 @@ exp1 %>%
 select(dataset, correct, typeoftrial) %>%
 filter(correct == 1 & typeoftrial == "picture")
 ```
-# 
+# Horchak & Garrido means
 ```{r}
 means = condition_data %>%
-  group_by(trialcondition)%>%
+  group_by(weight, shape)%>%
   summarise(mean_rt = mean(rt),
     sd_rt = sd(rt),
     mean_acc = mean(correct))
@@ -65,14 +71,16 @@ condition_data %>%
   ylab("Count") +
   ggtitle("Histogram of RT")
 ```
+# Horchak & Garrido
 ```{r}
 means %>%
-  ggplot(aes(x=trialcondition, y=mean_rt))+
-  geom_bar(stat = "identity", fill = "red", color = "blue")+
+  ggplot(aes(x=shape, y=mean_rt, fill = weight))+
+  geom_col(position = "dodge")+
   theme_fivethirtyeight()+
-  xlab("RT (in milliseconds")+
-  ylab("Count")+
-  ggtitle("Barplot of R")
+  labs(x = "shape", y = "mean RT", title = "Barplot of RT")
+
+#another way to write xlab is labs(x = "", y = "", title = "")
+
 ```
 
 #read 
@@ -100,3 +108,58 @@ mean_ID = df %>%
   summarize(mean = mean(RT))
   
 ```
+
+```{r}
+df %>%
+group_by(ID)%>%
+count()
+
+```
+```{r}
+df %>%
+  group_by(ID, pathlength) %>%
+  count()
+```
+#exercise 5 oct 18
+```{r}
+mean_condition = df %>%
+  group_by(Type, pathlength) %>%
+  summarize(mean = mean(RT))
+
+mean_condition %>%
+  ggplot(aes(x = pathlength, y = mean, fill = Type))+
+  geom_col(position = "dodge")+
+  theme_fivethirtyeight()+
+  labs(x = "path length", y = "RT", title = "Barplot of RT")
+
+
+```
+
+# tidyverse mutate function
+```{r}
+df = df %>%
+  mutate(RT_seconds = RT/1000, accuracy = ifelse(pathlength ==1 & Type == "Related", 1, 0))
+
+df = df %>%
+  mutate(pathlength = as.factor(pathlength), Type = as.factor(Type))
+```
+
+# pull
+```{r}
+df %>% pull (Type)
+df %>% pull (RT)
+```
+
+```{r}
+levels(df %>% pull (pathlength))
+```
+
+# unique
+```{r}
+df %>% pull (ID) %>% unique()
+df %>% pull (response) %>% unique()
+unique(c(1,3,3,4,5,5,1,2))
+
+```
+
+
