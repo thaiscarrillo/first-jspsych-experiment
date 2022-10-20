@@ -13,7 +13,7 @@ library(tidyverse)
 library(ggthemes)
 library(ggplot2)
 ```
-#import data
+# import data
 
 ```{r}
 exp1 = read_csv("exp1.csv")
@@ -83,7 +83,7 @@ means %>%
 
 ```
 
-#read 
+# read 
 ```{r}
 df = read_csv("relatedness_exp.csv")
 ```
@@ -95,7 +95,7 @@ part_df = df %>%
   c(1,2))
 ```
 
-#exercise 2
+# exercise 2
 ```{r}
 mean_all = df %>%
   summarize(mean = mean(RT))
@@ -120,7 +120,7 @@ df %>%
   group_by(ID, pathlength) %>%
   count()
 ```
-#exercise 5 oct 18
+# exercise 5 oct 18
 ```{r}
 mean_condition = df %>%
   group_by(Type, pathlength) %>%
@@ -162,4 +162,59 @@ unique(c(1,3,3,4,5,5,1,2))
 
 ```
 
+# Oct 20: Wide Data Conversion
+```{r}
+df_wide1 = mean_condition %>%
+  pivot_wider(names_from = pathlength, values_from = mean)
+
+df_wide2 = mean_condition %>%
+  pivot_wider(names_from = Type, values_from = mean)
+```
+
+```{r}
+exp1_wide = means %>%
+  select(weight, shape, mean_rt) %>%
+  pivot_wider(names_from = weight, values_from = mean_rt)
+```
+
+```{r}
+mean_subject = condition_data %>%
+group_by(subject, weight, shape) %>%
+  summarize(mean_rt = mean(rt))
+```
+
+```{r}
+subject_wide = mean_subject %>%
+  pivot_wider(names_from = c(weight, shape), values_from = mean_rt)
+```
+
+# T-Test
+```{r}
+t.test(subject_wide$Heavy_Normal, subject_wide$Heavy_Smashed)
+```
+
+```{r}
+mean_subject %>%
+  filter(weight == "Heavy") %>% t.test(mean_rt ~ shape, data=.)
+```
+
+# Verifying R output
+```{r}
+x1_bar = mean(subject_wide$Heavy_Normal)
+x2_bar = subject_wide %>% pull(Heavy_Smashed) %>% mean()
+
+s1 = sd(subject_wide$Heavy_Normal)
+s2 = subject_wide %>% pull(Heavy_Smashed) %>% sd()
+
+n1 = nrow(subject_wide)
+n2 = subject_wide %>% pull(Heavy_Smashed) %>% length()
+```
+
+```{r}
+t_numerator = x1_bar - x2_bar
+inside_root1 = s1*s1/n1
+inside_root2 = s2*s2/n2
+t_denominator = sqrt(inside_root1 + inside_root2)
+t = t_numerator/t_denominator
+```
 
