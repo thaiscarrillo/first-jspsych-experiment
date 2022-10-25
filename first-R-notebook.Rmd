@@ -12,6 +12,8 @@ output: html_notebook
 library(tidyverse)
 library(ggthemes)
 library(ggplot2)
+library(rstatix)
+library(ggpubr)
 ```
 # import data
 
@@ -190,7 +192,7 @@ subject_wide = mean_subject %>%
 
 # T-Test
 ```{r}
-t.test(subject_wide$Heavy_Normal, subject_wide$Heavy_Smashed)
+t.test(subject_wide$Heavy_Normal, subject_wide$Heavy_Smashed, var.equal = TRUE, paired = TRUE)
 ```
 
 ```{r}
@@ -216,5 +218,79 @@ inside_root1 = s1*s1/n1
 inside_root2 = s2*s2/n2
 t_denominator = sqrt(inside_root1 + inside_root2)
 t = t_numerator/t_denominator
+```
+
+# Degrees of freedom (complex)
+```{r}
+x = s1*s1/n1
+y = s2*s2/n2
+
+a = s1*s1*s1*s1/(n1*n1*(n1-1))
+b = s2*s2*s2*s2/(n2*n2*(n2-1))
+
+deg = (x + y)*(x+y)/(a + b)
+```
+
+
+# P-Value
+```{r}
+p_value = 2*(1-pt(t,deg))
+```
+
+```{r}
+subject_wide = subject_wide %>%
+  mutate(diff = Heavy_Normal - Heavy_Smashed)
+```
+
+# ungroup for rstatix
+```{r}
+subject_wide = subject_wide %>% ungroup()
+outliers = subject_wide %>% identify_outliers(diff)
+```
+
+```{r}
+outlier_subs = outliers %>% pull(subject)
+
+subject_wide_new = subject_wide %>% filter(!subject %in% outlier_subs)
+```
+
+```{r}
+hist(subject_wide$diff)
+ggqqplot(subject_wide, "diff")
+```
+
+# a large value is needed to see if its a normal distribution--this is not a normal distribution
+```{r}
+subject_wide %>% shapiro_test(diff)
+```
+```{r}
+hist(subject_wide_new$diff)
+ggqqplot(subject_wide_new, "diff")
+subject_wide_new %>% shapiro_test(diff)
+```
+
+```{r}
+t.test(subject_wide_new$Heavy_Normal, subject_wide_new$Heavy_Smashed, paired = TRUE)
+```
+
+```{r}
+subject_wide = subject_wide %>%
+  mutate(diff2 = Heavy_Normal - Light_Normal)
+
+subject_wide = subject_wide %>% ungroup()
+
+outliers2 = subject_wide %>% identify_outliers(diff2)
+
+ggqqplot(subject_wide, "diff2")
+
+subject_wide %>% shapiro_test(diff2)
+```
+
+# Homework
+```{r}
+sids = outliers2 %>% pull(subject)
+new_df = subject_wide %>% filter(!subject %in% sids)
+
+t.test(new_df$Heavy_Normal, new_df$Light_Normal, paired = TRUE)
 ```
 
