@@ -7,6 +7,7 @@ output: html_notebook
 #install.packages("tidyverse",dependencies = TRUE)
 #install.packages("ggthemes", dependencies = FALSE)
 ```
+
 # load packages
 ```{r}
 library(tidyverse)
@@ -14,6 +15,7 @@ library(ggthemes)
 library(ggplot2)
 library(rstatix)
 library(ggpubr)
+library(datarium)
 ```
 # import data
 
@@ -292,5 +294,119 @@ sids = outliers2 %>% pull(subject)
 new_df = subject_wide %>% filter(!subject %in% sids)
 
 t.test(new_df$Heavy_Normal, new_df$Light_Normal, paired = TRUE)
+```
+
+# Oct 27: Pivot Longer
+```{r}
+subject_long = subject_wide %>%
+  select(-c(diff, diff2)) %>%
+  pivot_longer(names_to = "condition", cols = Heavy_Normal:Light_Smashed)
+```
+
+```{r}
+new_means = means %>%
+  select(weight, shape, mean_rt)
+
+new_means_wide = new_means %>%
+  pivot_wider(names_from = c(weight, shape), values_from = mean_rt)
+
+new_means_long = new_means_wide %>%
+  pivot_longer(names_to = "condition", cols = Heavy_Normal:Light_Smashed)
+
+new_means_long = new_means_long %>%
+  separate(condition, into = c("weight", "shape"), sep = "_") %>%
+  rename(mean_rt = value)
+
+```
+
+# One-way anova
+```{r}
+levels(iris %>% pull(Species))
+levels(iris$Species)
+```
+```{r}
+ggboxplot(iris, x = "Species", y = "Petal.Length")
+
+iris %>%
+  ggplot(aes(x=Species, y=Petal.Length))+
+  geom_boxplot()+
+  theme_fivethirtyeight()
+```
+```{r}
+iris %>%
+  group_by(Species) %>%
+  identify_outliers(Petal.Length)
+```
+
+```{r}
+iris %>%
+  group_by(Species)%>%
+  shapiro_test(Petal.Length)
+```
+```{r}
+ggqqplot(iris, "Petal.Length", facet.by = "Species")
+```
+```{r}
+iris %>%
+  group_by(Species) %>%
+  summarize(sd = sd(Petal.Length), var = var(Petal.Length))
+```
+```{r}
+iris %>% levene_test(Petal.Length ~ Species)
+```
+
+```{r}
+iris %>% anova_test(Petal.Length ~ Species)
+
+iris %>% welch_anova_test(Petal.Length ~ Species)
+```
+
+```{r}
+pwc = iris %>% tukey_hsd(Petal.Length ~ Species)
+pwc2 <- iris %>% games_howell_test(Petal.Length ~ Species)
+```
+
+# Load jobsatisfaction
+```{r}
+data("jobsatisfaction", package = "datarium")
+View(jobsatisfaction)
+```
+
+```{r}
+jobsatisfaction %>%
+  group_by(gender, education_level)%>%
+  summarise(mean = mean(score),
+    sd = sd(score))
+```
+```{r}
+ggboxplot(jobsatisfaction, x = "education_level", y = "score")
+
+jobsatisfaction %>%
+  ggplot(aes(x=education_level, y=score, color = "education_level", palette = "jco"))+
+  geom_boxplot()+
+  theme_fivethirtyeight()
+```
+
+# outliers
+```{r}
+jobsatisfaction %>%
+  group_by(education_level, gender) %>%
+  identify_outliers(score)
+```
+# normality
+```{r}
+jobsatisfaction %>%
+  group_by(gender, education_level) %>%
+  shapiro_test(score)
+```
+# homogeneity of variance
+```{r}
+jobsatisfaction %>%
+  levene_test(score ~ gender*education_level)
+```
+# two way anova
+```{r}
+jobsatisfaction %>%
+  anova_test(score ~ gender*education_level)
 ```
 
